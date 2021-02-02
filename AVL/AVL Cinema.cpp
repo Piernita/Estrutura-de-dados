@@ -219,6 +219,19 @@ noh* avl::rotacaoDirEsq(noh* umNoh){
 // método de busca auxiliar (retorna o nó), iterativo
 noh* avl::buscaAux(tipoChave chave) {
 //    #WARNING implemente
+    noh* atual = raiz;
+    while(atual != NULL){
+        if(atual->elemento.ano == chave){
+            return atual;
+        }
+        else if(atual->elemento.ano < chave){
+            atual = atual->PtDir;
+        }
+        else{
+            atual = atual->PtEsq;
+        }
+    }
+    return atual;
 }
 
 // busca elemento com uma dada chave na árvore e retorna o registro completo
@@ -234,6 +247,7 @@ dado avl::busca(tipoChave chave) {
 // nó mínimo (sucessor) de subárvore com raiz em raizSub (folha mais à esquerda)
 noh* avl::encontraMenor(noh* raizSub) {
 //    #WARNING implemente
+
 }
 
 // procedimento auxiliar para remover o sucessor substituíndo-o pelo
