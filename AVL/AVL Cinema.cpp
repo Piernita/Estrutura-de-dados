@@ -80,9 +80,11 @@ class avl {
         noh* raiz;
         // percorrimento em ordem da árvore
         void percorreEmOrdemAux(noh* atual, int nivel);
+ //       void percorreEmOrdem() { percorreEmOrdemAux(raiz, x); }
         // funções auxiliares para remoção
         noh* encontraMenor(noh* raizSub);
         noh* removeMenor(noh* raizSub);
+        int Nivel(int chave);
         // funções auxiliares para inserção e remoção usando método recursivo
         // retorna o nó para ajustar o pai ou o raiz
         noh* insereAux(noh* umNoh, const dado& umDado);
@@ -175,6 +177,7 @@ noh* avl::arrumaBalanceamento(noh* umNoh) {
     if((fatorBal < -1) and (umNoh->PtDir->fatorBalanceamento() > 0)){
         return rotacaoDirEsq(umNoh);
     }
+    return umNoh;
 }
 
 
@@ -247,13 +250,23 @@ dado avl::busca(tipoChave chave) {
 // nó mínimo (sucessor) de subárvore com raiz em raizSub (folha mais à esquerda)
 noh* avl::encontraMenor(noh* raizSub) {
 //    #WARNING implemente
-
+    while(raizSub->PtEsq != NULL){
+        raizSub = raizSub->PtEsq;
+    }
+    return raizSub;
 }
 
 // procedimento auxiliar para remover o sucessor substituíndo-o pelo
 // seu filho à direita
 noh* avl::removeMenor(noh* raizSub) {
  //   #WARNING implemente
+    if(raizSub->PtEsq == NULL){
+        return raizSub->PtDir;
+    }
+    else{
+        raizSub->PtEsq = removeMenor(raizSub->PtEsq);
+        return arrumaBalanceamento(raizSub);
+    }
 }
 
 // remoção recursiva
@@ -263,12 +276,56 @@ void avl::remove(tipoChave chave) {
 
 noh* avl::removeAux(noh* umNoh, tipoChave chave) {
 //    #WARNING implemente
+    if(umNoh == NULL){
+        throw runtime_error("ERRO");
+    }
+    noh* NovaRaiz = umNoh;
+    if(chave < umNoh->elemento.ano){
+        umNoh->PtEsq = removeAux(umNoh->PtEsq, chave);
+    }
+    else if(chave > umNoh->elemento.ano){
+        umNoh->PtDir = removeAux(umNoh->PtDir, chave);
+    }
+    else{
+        if(umNoh->PtEsq == NULL){
+            NovaRaiz = umNoh->PtDir;
+        }
+        else if(umNoh->PtDir == NULL){
+            NovaRaiz = umNoh->PtEsq;
+        }
+        else{
+            NovaRaiz = encontraMenor(umNoh->PtDir);
+            NovaRaiz->PtDir = removeMenor(umNoh->PtDir);
+            NovaRaiz->PtEsq = umNoh->PtEsq;
+        }
+        delete umNoh;
+    }
+    return arrumaBalanceamento(NovaRaiz);
 }
 
+int avl::Nivel(int chave){
+    noh* atual = raiz;
+    int cont = 0;
+    while(atual->elemento.ano != chave){
+        if(atual->elemento.ano < chave){
+            atual = atual->PtDir;
+        }
+        else{
+            atual = atual->PtEsq;
+        }
+        cont++;
+    }
+    return cont;
+}
 
 // utiliza o nó atual e seu nível na árvore (para facilitar visualização)
 void avl::percorreEmOrdemAux(noh* atual, int nivel) {
 //    #WARNING implemente
+    if(atual != NULL){
+        percorreEmOrdemAux(atual->PtEsq, nivel);
+        cout << atual->elemento.ano << "/" << Nivel(atual->elemento.ano) << " ";
+        percorreEmOrdemAux(atual->PtDir, nivel);
+    }
 }
 
 ostream& operator<<(ostream& output, avl& arvore) {
