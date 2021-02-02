@@ -47,10 +47,31 @@ class noh {
             elemento(umDado),  PtEsq(NULL), PtDir(NULL), altura(1) { }
         ~noh() { }
         int fatorBalanceamento();
+        int informarAltura(noh* umNoh);
+        void atualizarAltura();
 };
 
 int noh::fatorBalanceamento() {
-//    #WARNING implemente
+//  #Implementado
+    return informarAltura(PtEsq) - informarAltura(PtDir);
+}
+
+int noh::informarAltura(noh* umNoh){
+//  #Implementado
+    if(umNoh == NULL){
+        return 0;
+    }
+    else{
+        return umNoh->altura;
+    }
+}
+
+void noh::atualizarAltura(){
+//  #Implementado
+	int altArvEsq = 0, altArvDir = 0;
+    altArvEsq = informarAltura(PtEsq);
+	altArvDir = informarAltura(PtDir);
+	this->altura = 1 + max(altArvEsq, altArvDir);
 }
 
 class avl {
@@ -69,6 +90,8 @@ class avl {
         // métodos para manutenção do balanceamento
         noh* rotacaoEsquerda(noh* umNoh);
         noh* rotacaoDireita(noh* umNoh);
+        noh* rotacaoEsqDir(noh* umNoh);
+        noh* rotacaoDirEsq(noh* umNoh);
         noh* arrumaBalanceamento(noh* umNoh);
         // busca, método iterativo
         noh* buscaAux(tipoChave chave);
@@ -98,7 +121,7 @@ avl::~avl() {
 
 // destrutor é recursivo, fazendo percorrimento pós-ordem
 void avl::destruirRecursivamente(noh* umNoh) {
-    //#WARNING implemente
+//  #Implementado
     if(umNoh != NULL){
         destruirRecursivamente(umNoh->PtEsq);
         destruirRecursivamente(umNoh->PtDir);
@@ -112,13 +135,46 @@ void avl::insere(const dado& umDado) {
 
 // inserção recursiva, devolve nó para atribuição de pai ou raiz
 noh* avl::insereAux(noh* umNoh, const dado& umDado) {
-//    #WARNING implemente
+//  #Implementado
+    if(umNoh == NULL){
+        noh* NovoNoh = new noh(umDado);
+        return NovoNoh;
+    }
+    else{
+        if(umDado.ano < umNoh->elemento.ano){
+            umNoh->PtEsq = insereAux(umNoh->PtEsq, umDado);
+        }
+        else{
+            umNoh->PtDir = insereAux(umNoh->PtDir, umDado);
+        }
+    }
+    return arrumaBalanceamento(umNoh);
 }
 
 // checa e arruma, se necessário, o balanceamento em umNoh,
 // fazendo as rotações e ajustes necessários
 noh* avl::arrumaBalanceamento(noh* umNoh) {
-//    #WARNING implemente
+//  #Implementado
+    if(umNoh == NULL){
+        return umNoh;
+    }
+    umNoh->atualizarAltura();
+    int fatorBal = umNoh->fatorBalanceamento();
+    if((fatorBal >= -1) and (fatorBal <= 1)){
+        return umNoh;
+    }
+    if((fatorBal > 1) and (umNoh->PtEsq->fatorBalanceamento() >= 0)){
+        return rotacaoDireita(umNoh);
+    }
+    if((fatorBal > 1) and (umNoh->PtEsq->fatorBalanceamento() < 0)){
+        return rotacaoEsqDir(umNoh);
+    }
+    if((fatorBal < -1) and (umNoh->PtDir->fatorBalanceamento() <= 0)){
+        return rotacaoEsquerda(umNoh);
+    }
+    if((fatorBal < -1) and (umNoh->PtDir->fatorBalanceamento() > 0)){
+        return rotacaoDirEsq(umNoh);
+    }
 }
 
 
@@ -133,6 +189,14 @@ noh* avl::rotacaoEsquerda(noh* umNoh) {
 // retorna o novo pai da subárvore
 noh* avl::rotacaoDireita(noh* umNoh) {
 //    #WARNING implemente
+}
+
+noh* avl::rotacaoEsqDir(noh* umNoh){
+
+}
+
+noh* avl::rotacaoDirEsq(noh* umNoh){
+
 }
 
 
