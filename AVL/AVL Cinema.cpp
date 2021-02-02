@@ -181,22 +181,38 @@ noh* avl::arrumaBalanceamento(noh* umNoh) {
 // rotação à esquerda na subárvore com raiz em umNoh
 // retorna o novo pai da subárvore
 noh* avl::rotacaoEsquerda(noh* umNoh) {
-//    #WARNING implemente
+//   #Implementado
+    noh* aux =  umNoh->PtDir;
+    umNoh->PtDir = aux->PtEsq;
+    aux->PtEsq = umNoh;
+    umNoh->atualizarAltura();
+    aux->atualizarAltura();
+    return aux;
 }
 
 
 // rotação à direita na subárvore com raiz em umNoh
 // retorna o novo pai da subárvore
 noh* avl::rotacaoDireita(noh* umNoh) {
-//    #WARNING implemente
+//   #Implementado
+    noh* aux = umNoh->PtEsq;
+    umNoh->PtEsq = aux->PtDir;
+    aux->PtDir = umNoh;
+    umNoh->atualizarAltura();
+    aux->atualizarAltura();
+    return aux;
 }
 
 noh* avl::rotacaoEsqDir(noh* umNoh){
-
+//   #Implementado
+    umNoh->PtEsq = rotacaoEsquerda(umNoh->PtEsq);
+    return rotacaoDireita(umNoh);
 }
 
 noh* avl::rotacaoDirEsq(noh* umNoh){
-
+//   #Implementado
+    umNoh->PtDir = rotacaoDireita(umNoh->PtDir);
+    return rotacaoEsquerda(umNoh);
 }
 
 
