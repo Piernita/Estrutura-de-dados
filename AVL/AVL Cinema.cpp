@@ -1,6 +1,5 @@
 /* avl - Árvore Binária de Busca com Balanceamento AVL
  *
- *
  * by Joukim, Outubro de 2020 - Estrutura de Dados (GCC216)
  * Caracteristicas de implementação outubro de 2019:
  * -> tratamento de exceção
@@ -47,10 +46,31 @@ class noh {
             elemento(umDado),  PtEsq(NULL), PtDir(NULL), altura(1) { }
         ~noh() { }
         int fatorBalanceamento();
+        int informarAltura(noh* umNoh);
+        void atualizarAltura();
 };
 
 int noh::fatorBalanceamento() {
-//    #WARNING implemente
+//Implementado
+    return informarAltura(PtEsq) - informarAltura(PtDir);
+}
+
+int noh::informarAltura(noh* umNoh){
+//Implementado
+    if(umNoh == NULL){
+        return 0;
+    }
+    else{
+        return umNoh->altura;
+    }
+}
+
+void noh::atualizarAltura(){
+//Implementado
+	int altArvEsq = 0, altArvDir = 0;
+    altArvEsq = informarAltura(PtEsq);
+	altArvDir = informarAltura(PtDir);
+	this->altura = 1 + max(altArvEsq, altArvDir);
 }
 
 class avl {
@@ -59,23 +79,34 @@ class avl {
         noh* raiz;
         // percorrimento em ordem da árvore
         void percorreEmOrdemAux(noh* atual, int nivel);
+        int Nivel(int chave);
+
         // funções auxiliares para remoção
         noh* encontraMenor(noh* raizSub);
         noh* removeMenor(noh* raizSub);
+
         // funções auxiliares para inserção e remoção usando método recursivo
         // retorna o nó para ajustar o pai ou o raiz
         noh* insereAux(noh* umNoh, const dado& umDado);
         noh* removeAux(noh* umNoh, tipoChave chave);
+
         // métodos para manutenção do balanceamento
         noh* rotacaoEsquerda(noh* umNoh);
         noh* rotacaoDireita(noh* umNoh);
+        noh* rotacaoEsqDir(noh* umNoh);
+        noh* rotacaoDirEsq(noh* umNoh);
         noh* arrumaBalanceamento(noh* umNoh);
+
         // busca, método iterativo
         noh* buscaAux(tipoChave chave);
+
         // função auxiliar do destrutor, usa percorrimento pós-ordem
         void destruirRecursivamente(noh* umNoh);
+
         void imprimirDir(const std::string& prefixo, const noh* meuNoh);
         void imprimirEsq(const std::string& prefixo, const noh* meuNoh, bool temIrmao);
+
+        // função auxiliar do levantamento, usa percorrimento pré-ordem
         void levantamentoAux(noh* umNoh, unsigned* ptrAnoProcurado, unsigned* ptrMaiorNumFilmesApres);
     public:
         avl() { raiz = NULL; }
@@ -85,10 +116,14 @@ class avl {
         void insere(const dado& umDado);
         void remove(tipoChave chave);
         // inserção e remoção, métodos recursivos
+
         // busca retorna uma cópia do objeto armazenado
         dado busca(tipoChave chave);
+
         // efetua levantamento do ano com maior número de filmes apresentados
         unsigned levantamento();
+        // função para depuração
+        void percorreEmOrdem() { percorreEmOrdemAux(raiz, raiz->altura); }
 };
 
 // destrutor
@@ -98,7 +133,7 @@ avl::~avl() {
 
 // destrutor é recursivo, fazendo percorrimento pós-ordem
 void avl::destruirRecursivamente(noh* umNoh) {
-    //#WARNING implemente
+//Implementado
     if(umNoh != NULL){
         destruirRecursivamente(umNoh->PtEsq);
         destruirRecursivamente(umNoh->PtDir);
@@ -112,33 +147,104 @@ void avl::insere(const dado& umDado) {
 
 // inserção recursiva, devolve nó para atribuição de pai ou raiz
 noh* avl::insereAux(noh* umNoh, const dado& umDado) {
-//    #WARNING implemente
+//Implementado
+    if(umNoh == NULL){
+        noh* NovoNoh = new noh(umDado);
+        return NovoNoh;
+    }
+    else{
+        if(umDado.ano < umNoh->elemento.ano){
+            umNoh->PtEsq = insereAux(umNoh->PtEsq, umDado);
+        }
+        else{
+            umNoh->PtDir = insereAux(umNoh->PtDir, umDado);
+        }
+    }
+    return arrumaBalanceamento(umNoh);
 }
 
 // checa e arruma, se necessário, o balanceamento em umNoh,
 // fazendo as rotações e ajustes necessários
 noh* avl::arrumaBalanceamento(noh* umNoh) {
-//    #WARNING implemente
+//Implementado
+    if(umNoh == NULL){
+        return umNoh;
+    }
+    umNoh->atualizarAltura();
+    int fatorBal = umNoh->fatorBalanceamento();
+    if((fatorBal >= -1) and (fatorBal <= 1)){
+        return umNoh;
+    }
+    if((fatorBal > 1) and (umNoh->PtEsq->fatorBalanceamento() >= 0)){
+        return rotacaoDireita(umNoh);
+    }
+    if((fatorBal > 1) and (umNoh->PtEsq->fatorBalanceamento() < 0)){
+        return rotacaoEsqDir(umNoh);
+    }
+    if((fatorBal < -1) and (umNoh->PtDir->fatorBalanceamento() <= 0)){
+        return rotacaoEsquerda(umNoh);
+    }
+    if((fatorBal < -1) and (umNoh->PtDir->fatorBalanceamento() > 0)){
+        return rotacaoDirEsq(umNoh);
+    }
+    return umNoh;
 }
 
 
 // rotação à esquerda na subárvore com raiz em umNoh
 // retorna o novo pai da subárvore
 noh* avl::rotacaoEsquerda(noh* umNoh) {
-//    #WARNING implemente
+//Implementado
+    noh* aux =  umNoh->PtDir;
+    umNoh->PtDir = aux->PtEsq;
+    aux->PtEsq = umNoh;
+    umNoh->atualizarAltura();
+    aux->atualizarAltura();
+    return aux;
 }
 
 
 // rotação à direita na subárvore com raiz em umNoh
 // retorna o novo pai da subárvore
 noh* avl::rotacaoDireita(noh* umNoh) {
-//    #WARNING implemente
+//Implementado
+    noh* aux = umNoh->PtEsq;
+    umNoh->PtEsq = aux->PtDir;
+    aux->PtDir = umNoh;
+    umNoh->atualizarAltura();
+    aux->atualizarAltura();
+    return aux;
+}
+
+noh* avl::rotacaoEsqDir(noh* umNoh){
+//Implementado
+    umNoh->PtEsq = rotacaoEsquerda(umNoh->PtEsq);
+    return rotacaoDireita(umNoh);
+}
+
+noh* avl::rotacaoDirEsq(noh* umNoh){
+//Implementado
+    umNoh->PtDir = rotacaoDireita(umNoh->PtDir);
+    return rotacaoEsquerda(umNoh);
 }
 
 
 // método de busca auxiliar (retorna o nó), iterativo
 noh* avl::buscaAux(tipoChave chave) {
-//    #WARNING implemente
+//Implementado
+    noh* atual = raiz;
+    while(atual != NULL){
+        if(atual->elemento.ano == chave){
+            return atual;
+        }
+        else if(atual->elemento.ano < chave){
+            atual = atual->PtDir;
+        }
+        else{
+            atual = atual->PtEsq;
+        }
+    }
+    return atual;
 }
 
 // busca elemento com uma dada chave na árvore e retorna o registro completo
@@ -153,13 +259,24 @@ dado avl::busca(tipoChave chave) {
 
 // nó mínimo (sucessor) de subárvore com raiz em raizSub (folha mais à esquerda)
 noh* avl::encontraMenor(noh* raizSub) {
-//    #WARNING implemente
+//Implementado
+    while(raizSub->PtEsq != NULL){
+        raizSub = raizSub->PtEsq;
+    }
+    return raizSub;
 }
 
 // procedimento auxiliar para remover o sucessor substituíndo-o pelo
 // seu filho à direita
 noh* avl::removeMenor(noh* raizSub) {
- //   #WARNING implemente
+//Implementado
+    if(raizSub->PtEsq == NULL){
+        return raizSub->PtDir;
+    }
+    else{
+        raizSub->PtEsq = removeMenor(raizSub->PtEsq);
+        return arrumaBalanceamento(raizSub);
+    }
 }
 
 // remoção recursiva
@@ -168,13 +285,59 @@ void avl::remove(tipoChave chave) {
 }
 
 noh* avl::removeAux(noh* umNoh, tipoChave chave) {
-//    #WARNING implemente
+//Implementado
+    if(umNoh == NULL){
+        throw runtime_error("ERRO");
+    }
+    noh* NovaRaiz = umNoh;
+    if(chave < umNoh->elemento.ano){
+        umNoh->PtEsq = removeAux(umNoh->PtEsq, chave);
+    }
+    else if(chave > umNoh->elemento.ano){
+        umNoh->PtDir = removeAux(umNoh->PtDir, chave);
+    }
+    else{
+        if(umNoh->PtEsq == NULL){
+            NovaRaiz = umNoh->PtDir;
+        }
+        else if(umNoh->PtDir == NULL){
+            NovaRaiz = umNoh->PtEsq;
+        }
+        else{
+            NovaRaiz = encontraMenor(umNoh->PtDir);
+            NovaRaiz->PtDir = removeMenor(umNoh->PtDir);
+            NovaRaiz->PtEsq = umNoh->PtEsq;
+        }
+        delete umNoh;
+    }
+    return arrumaBalanceamento(NovaRaiz);
 }
 
+// encontra o nivel do noh
+int avl::Nivel(int chave){
+//Implementado
+    noh* atual = raiz;
+    int cont = 0;
+    while(atual->elemento.ano != chave){
+        if(atual->elemento.ano < chave){
+            atual = atual->PtDir;
+        }
+        else{
+            atual = atual->PtEsq;
+        }
+        cont++;
+    }
+    return cont;
+}
 
 // utiliza o nó atual e seu nível na árvore (para facilitar visualização)
 void avl::percorreEmOrdemAux(noh* atual, int nivel) {
-//    #WARNING implemente
+//Implementado
+    if(atual != NULL){
+        percorreEmOrdemAux(atual->PtEsq, atual->altura);
+        cout << atual->elemento.ano << "/" << Nivel(atual->elemento.ano) << " ";
+        percorreEmOrdemAux(atual->PtDir, atual->altura);
+    }
 }
 
 ostream& operator<<(ostream& output, avl& arvore) {
@@ -220,8 +383,23 @@ void avl::imprimirEsq(const std::string& prefixo, const noh* meuNoh, bool temIrm
     }
 }
 
+void avl::levantamentoAux(noh* umNoh, unsigned* ptrAnoProcurado, unsigned* ptrMaiorNumFilmesApres){
+//Implementado
+    if(umNoh != NULL){
+        levantamentoAux(umNoh->PtEsq, ptrAnoProcurado, ptrMaiorNumFilmesApres);
+        if( *ptrMaiorNumFilmesApres < umNoh->elemento.qtdadeFilmesApresentados){
+            *ptrMaiorNumFilmesApres = umNoh->elemento.qtdadeFilmesApresentados;
+            *ptrAnoProcurado = umNoh->elemento.ano;
+        }
+        levantamentoAux(umNoh->PtDir, ptrAnoProcurado, ptrMaiorNumFilmesApres);
+    }
+}
+
 unsigned avl::levantamento(){
-//implantar
+//Implementado
+    unsigned ano = 0, num = 0;
+    levantamentoAux(raiz, &ano, &num);
+    return ano;
 }
 
 
@@ -284,3 +462,5 @@ int main() {
 
     return 0;
 }
+
+// by Little D. Legs 02/01/2021
