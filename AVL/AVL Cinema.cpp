@@ -371,8 +371,22 @@ void avl::imprimirEsq(const std::string& prefixo, const noh* meuNoh, bool temIrm
     }
 }
 
+void avl::levantamentoAux(noh* umNoh, unsigned* ptrAnoProcurado, unsigned* ptrMaiorNumFilmesApres){
+    if(umNoh != NULL){
+        levantamentoAux(umNoh->PtEsq, ptrAnoProcurado, ptrMaiorNumFilmesApres);
+        if( *ptrMaiorNumFilmesApres < umNoh->elemento.qtdadeFilmesApresentados){
+            *ptrMaiorNumFilmesApres = umNoh->elemento.qtdadeFilmesApresentados;
+            *ptrAnoProcurado = umNoh->elemento.ano;
+        }
+        levantamentoAux(umNoh->PtDir, ptrAnoProcurado, ptrMaiorNumFilmesApres);
+    }
+}
+
 unsigned avl::levantamento(){
 //implantar
+    unsigned ano = 0, num = 0;
+    levantamentoAux(raiz, &ano, &num);
+    return ano;
 }
 
 
